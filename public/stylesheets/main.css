@@ -1,0 +1,53 @@
+/*html {
+  background: linear-gradient(to right, #e6dada, #274046); }*/
+
+  /*html {
+    background: black; }*/
+
+/*body {
+  background: linear-gradient(to right, #e6dada, #274046);}*/
+
+#main {
+  margin: 10px;
+}
+
+.text-red {
+  color: red;
+}
+
+.text-green {
+  color: green;
+}
+
+.pos-center {
+  display: table;
+  margin: 0 auto;
+}
+
+.large-container {
+  width: 1000px;
+  height: 500px;
+}
+
+.code-mirror-container {
+  margin: 15px 0;
+  display: block;
+}
+
+.medium-form {
+  width: 500px;
+  height: 100px;
+  display: block;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.nav {
+  display: inline-block;
+}
+
+.nav-tabs {
+  display: inline-block;
+}

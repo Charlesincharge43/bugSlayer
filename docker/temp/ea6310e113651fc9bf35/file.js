@@ -1,0 +1,1 @@
+var a= 6; console.log(5); console.log(a);
