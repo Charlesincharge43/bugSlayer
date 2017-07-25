@@ -1,29 +1,23 @@
 import axios from 'axios'
 
 //fix the constants ASAP
-const GET_DBCODES = 'GET_DBCODES'
+const SET_STATUS = 'SET_STATUS'
 
 //-------------------------------- ACTION CREATORS ------
-export const get_DbCodes_AC = dbCodes => ({
-  type: GET_DBCODES,
-  dbCodes
+
+export const set_Status_AC = status => ({
+  type: SET_STATUS,
+  status
 })
-
-//-------------------------------- THUNK CREATORS ------
-
-export const someTC = userCode => {
-  return function thunk(dispatch){
-  }
-}
 
 //-------------------------------- REDUCER AND INITIAL STATE ------
 
-const initialState = []
+const initialState = 'resting'
 
 const reducer = (prevState = initialState, action) => {
   switch (action.type) {
-  case GET_DBCODES:
-    return action.dbCodes
+  case SET_STATUS:
+    return action.status
   default:
     return prevState
   }

@@ -11,6 +11,22 @@
   margin: 10px;
 }
 
+.blink_me {
+  animation: blinker 1s linear infinite;
+}
+
+@keyframes blinker {
+  50% { opacity: 0; }
+}
+
+.slim_tb_margins {
+  margin: 10px 5px auto;
+}
+
+.text-24 {
+  font-size: 24px;
+}
+
 .text-red {
   color: red;
 }
@@ -22,6 +38,11 @@
 .pos-center {
   display: table;
   margin: 0 auto;
+}
+
+.pos-right {
+  display: table;
+  margin: 0 0 0 auto;
 }
 
 .large-container {

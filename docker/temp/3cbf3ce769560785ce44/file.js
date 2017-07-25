@@ -1,1 +1,0 @@
-console.log(Promise.resolve('blah'))

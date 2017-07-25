@@ -1,8 +1,0 @@
-
-/usercode/file.js:1
-, require, module, __filename, __dirname) { setInterval(function(){ alert("Hel
-                                                                    ^
-ReferenceError: alert is not defined
-    at null.<anonymous> (/usercode/file.js:1:87)
-    at wrapper [as _onTimeout] (timers.js:252:14)
-    at Timer.listOnTimeout [as ontimeout] (timers.js:110:15)

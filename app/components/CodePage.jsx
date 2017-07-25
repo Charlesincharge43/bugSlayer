@@ -4,40 +4,50 @@ import {connect} from 'react-redux'
 import CodeForm from './CodeForm'
 import Output from './Output'
 import ProgressNav from './ProgressNav'
-import dbCodes from '../fakeSeed'//delete later
+import dbCodes from '../fakeSeed'// delete later
 
-import { get_Code_Output_AC, compile_UserCode_TC } from '../reducers/code'
-import { get_DbCodes_AC, set_DbCurrentCode_AC } from '../reducers/dbCodes'
+import { init_Codes_AC, get_Code_Output_AC, compile_UserCode_TC } from '../reducers/codes'
+import { get_DbCodes_AC } from '../reducers/dbCodes'
+import { set_codeIdx_AC } from '../reducers/codeIdx'
 
 class CodePage extends Component {
-  constructor(){
+  constructor() {
     super()
     this.next = this.next.bind(this)
+    this.prev = this.prev.bind(this)
   }
 
-  componentDidMount(){
+  componentDidMount() {
     // placeholder.. replace these two with thunk that queries database later
-    this.props.get_DbCodes_AC(dbCodes)//I hate how if you take a shortcut like this (see mapdispatch), these are no longer action creators, but the action objects..
-    this.props.set_DbCurrentCode_AC(0)
+    this.props.get_DbCodes_AC(dbCodes)// I hate how if you take a shortcut like this (see mapdispatch), these are no longer action creators, but the action objects..
+    this.props.init_Codes_AC(dbCodes)
+    this.props.set_codeIdx_AC(0)
   }
 
-  explain(){
+  explain() {
 
   }
 
-  next(){
-    console.log("should go to the next")
-    this.props.set_DbCurrentCode_AC(this.props.dbCurrentCode + 1)
+  next() {
+    const length = this.props.dbCodes.length
+    const codeIdx = this.props.codeIdx
+    if (codeIdx < length - 1){
+      this.props.get_Code_Output_AC('')
+      this.props.set_codeIdx_AC(this.props.codeIdx + 1)
+    }
   }
 
-  prev(){
-    console.log("should go to the prev")
-    this.props.dbCurrentCode && this.props.set_DbCurrentCode_AC(this.props.dbCurrentCode - 1)
+  prev() {
+    if (this.props.codeIdx) {
+      this.props.get_Code_Output_AC('')
+      this.props.set_codeIdx_AC(this.props.codeIdx - 1)
+    }
   }
 
-  render(){
-    return(
+  render() {
+    return (
       <div>
+        <h2 className='text-center slim_tb_margins'>What's wrong with my code?</h2>
         <ProgressNav next={this.next} prev={this.prev} />
         <CodeForm />
         <Output />
@@ -48,11 +58,11 @@ class CodePage extends Component {
 
 const mapState = (state) => {
   return {
-    dbCodes: state.dbCodes.dbCodes,
-    dbCurrentCode: state.dbCodes.dbCurrentCode,
+    dbCodes: state.dbCodes,
+    codeIdx: state.codeIdx,
   }
 }
-const mapDispatch = { get_DbCodes_AC, set_DbCurrentCode_AC }
+const mapDispatch = { get_DbCodes_AC, set_codeIdx_AC, get_Code_Output_AC, init_Codes_AC }
 
 const ConnectedCodePage = connect(mapState, mapDispatch)(CodePage)
 

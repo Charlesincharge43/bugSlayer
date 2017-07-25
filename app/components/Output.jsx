@@ -4,34 +4,44 @@ import {connect} from 'react-redux'
 import { Link } from 'react-router-dom'
 
 const Output = (props) => {
-  let errors = props.code.errors
-  let output = props.code.output
+  const codeIdx = props.codeIdx
+  const codes = props.codes
+  const currentCode = codes[codeIdx]
+  const completed = currentCode && currentCode.completed
+  const errors = currentCode ? currentCode.errors : ''
+  const outputForUser = currentCode ? currentCode.outputForUser : ''
+  const evalOutput = currentCode ? currentCode.evalOutput : ''
+  const status = props.status
   return (
     <div className = 'large-container'>
         <span className = 'text-center'>OUTPUT:</span><hr/>
-        {
-          output !== '' &&
-          (
-            <span>
-              <pre>{output}</pre>
-            </span>
-          )
-        }
-        {
-          errors !== '' &&
-          (
-            <span>
-              <pre className = "text-red">{errors}</pre>
-            </span>
-          )
-        }
+
+        <span>
+          {status === 'compiling_short' && <h4 className='blink_me'> Compiling User Code... </h4>}
+          {status === 'compiling_long' &&
+          <div>
+            <h4 className='blink_me'> Testing User and Solution Code, randomizing inputs... </h4>
+            <h4 className='blink_me'> Please be patient! </h4>
+          </div>}
+        </span>
+
+        <span>
+        {outputForUser !== '' && <pre>{outputForUser}</pre>}
+        {errors !== '' && <pre className = "text-red">{errors}</pre>}
+        { evalOutput !== '' && (
+          completed ? <pre className = "text-green">{evalOutput}</pre> : <pre className = "text-red">{evalOutput}</pre>
+        )}
+        </span>
+
     </div>
   )
 }
 
 const mapState = (state) => {
   return {
-    code: state.code,
+    codes: state.codes,
+    codeIdx: state.codeIdx,
+    status: state.status
   }
 }
 

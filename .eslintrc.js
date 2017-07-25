@@ -6,9 +6,9 @@ module.exports = {
     sourceType: "module",
     ecmaVersion: 8
   },
-  ecmaFeatures: {
-    jsx: true,
-  },
+  // ecmaFeatures: {
+  //   jsx: true,
+  // }, //don't know what is going here... but it's causing a lot of errors
   plugins: ['react'],
   rules: {
     "space-before-function-paren": ["error", "never"],

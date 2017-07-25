@@ -1,9 +1,10 @@
 import React, { Component } from 'react'
-import CodeMirror from 'react-codemirror'//https://github.com/JedWatson/react-codemirror/
-import 'codemirror/mode/javascript/javascript'//just FYI, leaving out from just makes this module available to webpack (as like a global..) .. doesn't save to a variable?  Clarify about this later
+import CodeMirror from 'react-codemirror'// https://github.com/JedWatson/react-codemirror/
+import 'codemirror/mode/javascript/javascript'// just FYI, leaving out from just makes this module available to webpack (as like a global..) .. doesn't save to a variable?  Clarify about this later
 import {connect} from 'react-redux'
 
-import { compile_UserCode_TC } from '../reducers/code'
+import {testAndModify} from '../outputModifier/testAndModify'
+import {compile_UserCode_Set_TC, compile_UserCode_TC, get_Code_ModOutput_AC} from '../reducers/codes'
 
 // import brace from 'brace';
 // import AceEditor from 'react-ace';
@@ -13,7 +14,7 @@ import { compile_UserCode_TC } from '../reducers/code'
 // You can use AceEditor if you figure out some way for the code to be color coded
 
 class CodeForm extends Component {
-  constructor(props){
+  constructor(props) {
     super(props)
     this.state = {
       userCode: '',
@@ -22,47 +23,75 @@ class CodeForm extends Component {
     this.handleChange = this.handleChange.bind(this)
     this.handleAttempt = this.handleAttempt.bind(this)
     this.handleSolution = this.handleSolution.bind(this)
+    this.handleRun = this.handleRun.bind(this)
   }
 
-  handleChange(userCode){
+  handleChange(userCode) {
     this.setState({userCode: userCode})
   }
 
-  handleAttempt(e){
+  handleAttempt(e) {
     e.preventDefault()
-    this.props.compile_UserCode_TC(this.state.userCode)
+    const codeIdx = this.props.codeIdx
+    const dbCurrentCodeObj = this.props.dbCodes[codeIdx]
+    const expected = dbCurrentCodeObj.expected
+
+    // compile prepending code, then concat stdout of prepending code with user and solution code (each) + appending code
+    // then evaluate
+    this.props.compile_UserCode_Set_TC({
+      userCode: this.state.userCode,
+      solutionCode: dbCurrentCodeObj.solutionCode,
+      prependingCode: dbCurrentCodeObj.prependingCode,
+      appendingCode: dbCurrentCodeObj.appendingCode,
+      codeIdx: this.props.codeIdx,
+    })
+    .then(() => {
+      const currentCode = this.props.codes[this.props.codeIdx]
+      if (currentCode.errors === ''){
+        const outputObj = testAndModify({rawOutput: currentCode.output, solOutput: currentCode.solOutput, expected})
+
+        this.props.get_Code_ModOutput_AC(this.props.codeIdx, outputObj)
+      }
+    })
+    .catch(console.err)
   }
 
-  handleSolution(e){
+  handleRun(e){
+    // compile user code (this is just if user wants to test)
+    this.props.compile_UserCode_TC({
+      userCode: this.state.userCode,
+      codeIdx: this.props.codeIdx,
+    })
+  }
+
+  handleSolution(e) {
     e.preventDefault()
     this.props.explain()
   }
 
-  componentWillReceiveProps(nextProps){// WHY IS THIS RUNNING ONLY ONCE?  WHY BOTH THINGS UPDATED AT ONCE
-    console.log('next Props ', nextProps)
-    console.log(nextProps.dbCurrentCode)
-    if (nextProps.dbCurrentCode !== this.props.dbCurrentCode) {
-      console.log(this.props.dbCodes)//IF WERE TO HAPPEN TWICE, THIS.PROPS.DBCODES SHOULD BE NULL FIRST TIME, AND 0 THE SECOND TIME
-      console.log(nextProps.dbCodes[nextProps.dbCurrentCode].starting)
-      this.setState({ userCode: nextProps.dbCodes[nextProps.dbCurrentCode].starting, render: false }, () => { this.setState({ render: true }) })
-      //this is necessary because stupid CodeMirror will not re-render even if you pass in new value props...
-      //so you have to un-render that element and then re-render it.
+  componentWillReceiveProps(nextProps) { // WHY IS THIS RUNNING ONLY ONCE?  WHY BOTH THINGS UPDATED AT ONCE
+    // console.log('next Props ', nextProps)
+    // console.log(nextProps.codeIdx)
+    if (nextProps.codeIdx !== this.props.codeIdx) {
+      // console.log(this.props.codes)// IF WERE TO HAPPEN TWICE, THIS.PROPS.CODES SHOULD BE NULL FIRST TIME, AND 0 THE SECOND TIME
+      // console.log(nextProps.codes[nextProps.codeIdx].startingCode)
+      this.setState({ userCode: nextProps.codes[nextProps.codeIdx].userCode, render: false }, () => { this.setState({ render: true }) })
+      // this is necessary because stupid CodeMirror will not re-render even if you pass in new value props...
+      // so you have to un-render that element and then re-render it.
     }
   }
 
-  componentDidMount(){
+  componentDidMount() {
   }
 
-  componentWillUnmount(){
+  componentWillUnmount() {
   }
 
-  render(){
-    console.log('array ', this.props.dbCodes)
-    console.log('current code', this.props.dbCurrentCode)
-    let options = {
+  render() {
+    const options = {
       lineNumbers: true,
       mode: 'javascript',
-     }
+    }
 
     return (
       <div className='code-mirror-container'>
@@ -76,6 +105,7 @@ class CodeForm extends Component {
           value={this.state.userCode}
           editorProps={{$blockScrolling: true}}
         /> */}
+        <button type="submit" className="btn btn-primary" onClick={this.handleRun}>Run</button>
         <button type="submit" className="btn btn-primary" onClick={this.handleAttempt}>Attempt</button>
         <button type="submit" className="btn btn-primary" onClick={this.handleSolution}>Solution</button>
       </div>
@@ -85,11 +115,12 @@ class CodeForm extends Component {
 
 const mapState = (state) => {
   return {
-    dbCodes: state.dbCodes.dbCodes,
-    dbCurrentCode: state.dbCodes.dbCurrentCode,
+    dbCodes: state.dbCodes,
+    codeIdx: state.codeIdx,
+    codes: state.codes,
   }
 }
-const mapDispatch = { compile_UserCode_TC }
+const mapDispatch = { compile_UserCode_Set_TC, compile_UserCode_TC, get_Code_ModOutput_AC }
 
 const ConnectedCodeForm = connect(mapState, mapDispatch)(CodeForm)
 
