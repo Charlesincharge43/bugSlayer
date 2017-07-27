@@ -21,14 +21,14 @@ class Root extends React.Component {
     let match = this.props.match;
     return (
       <div>
-        <nav>
+        {/* <nav>
           <div className="nav nav-tabs">
               <span>Home | </span>
               <span>Play | </span>
               <span>Levels</span>
             {user ? <WhoAmI/> : <Login/>}
           </div>
-        </nav>
+        </nav> */}
         <Switch>
           {/* <Route exact path={`${match.url}`} /> */}
           <Route exact path={`${match.url}/code`} component={ConnectedCodePage} />
