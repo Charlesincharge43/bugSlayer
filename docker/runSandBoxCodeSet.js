@@ -1,8 +1,9 @@
 const runSandBox = require('../docker/runSandBox')
 
-module.exports = function runSandBoxCodeSet({prependingCode, solutionCode, userCode}){
-  // console.log('prependingCode ', prependingCode)
-  return runSandBox({code: prependingCode })
+module.exports = function runSandBoxCodeSet({preRunCode, prependingCode, solutionCode, userCode}){
+  console.log('preRunCode ', preRunCode)
+  //preRunCode, solutionCode, userCode, prependingCode
+  return runSandBox({code: preRunCode })
     .then(outputObj => {
       console.log('outputObj is ', outputObj)
       const concattedSolutionCode = outputObj.output + solutionCode

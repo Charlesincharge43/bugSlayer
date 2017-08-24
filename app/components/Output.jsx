@@ -13,7 +13,7 @@ const Output = (props) => {
   const evalOutput = currentCode ? currentCode.evalOutput : ''
   const status = props.status
   return (
-    <div className = 'large-container'>
+    <div id = 'output-container'>
         <span className = 'text-center'>OUTPUT:</span><hr/>
 
         <span>

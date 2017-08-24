@@ -56,12 +56,12 @@ export const get_Code_ModOutput_AC = (idx, outputObj) => ({
 
 //-------------------------------- THUNK CREATORS ------
 
-export const compile_UserCode_TC = ({userCode, codeIdx}) => {
-  // this is for just running the code (user clicks run button) (no prepending code.. so faster, good for testing)
+export const compile_UserCode_TC = ({userCode, prependingCode, codeIdx}) => {
+  // this is for just running the code (user clicks run button) (no preRun code.. so faster, good for testing)
   return function thunk(dispatch) {
     dispatch(set_User_Code_AC(codeIdx, userCode))
     dispatch(set_Status_AC('compiling_short'))
-    return axios.post(`/api/compile/singleCode`, {code: userCode})
+    return axios.post(`/api/compile/singleCode`, {code: userCode, prependingCode})
       .then(res => {
         let data = res.data // data looks like this {output:data, langid: language,code:code, errors:err, time:exec_time} (see compile.js)
         let outputForUser = data.output
@@ -77,12 +77,12 @@ export const compile_UserCode_TC = ({userCode, codeIdx}) => {
   }
 }
 
-export const compile_UserCode_Set_TC = ({userCode, solutionCode, prependingCode, appendingCode, codeIdx}) => {
-  // this is for attempting to solve a problem (will take longer because will need to compile prepending code, and then user and solution code)
+export const compile_UserCode_Set_TC = ({userCode, solutionCode, preRunCode, prependingCode, appendingCode, codeIdx}) => {
+  // this is for attempting to solve a problem (will take longer because will need to compile preRun code, and then user and solution code)
   return function thunk(dispatch) {
     dispatch(set_User_Code_AC(codeIdx, userCode))
     dispatch(set_Status_AC('compiling_long'))
-    return axios.post(`/api/compile/codeSet`, {userCode, solutionCode, prependingCode, appendingCode})
+    return axios.post(`/api/compile/codeSet`, {userCode, solutionCode, preRunCode, prependingCode, appendingCode})
       .then(res => {
         const data = res.data // data looks like an object {userCodeOut: {},solutionCodeOut: {}}  (see compile.js)
         // and userCodeOut or solutionCodeOut looks kinda of like {output:data, langid: language,code:code, errors:err, time:exec_time} (see compile.js)

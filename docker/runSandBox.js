@@ -25,13 +25,15 @@ module.exports = function runSandBox({code, language = 4, stdin = '', timeout_va
     arr.compilerArray[language][4],
     stdin)
 
+  console.log('code is ',code)
+
   // everything written in the sandbox library is non-promise async, so it needs to be promisified
   function promisifiedRunSandBox() {
       return new Promise(function (resolve, reject) {
         // data will contain the output of the compiled/interpreted code
         // the result maybe normal program output, list of error messages or a Timeout error
           sandboxInst.run(function(data, exec_time, err) {
-            return resolve({output:data, langid: language, code:code, errors:err, time:exec_time})
+            return resolve({output:data, langid: language, code, errors:err, time:exec_time})
           })
       })
   }

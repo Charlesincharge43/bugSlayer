@@ -1,0 +1,5 @@
+[ 1, 2, 3, 4 ]
+#SPECIALTAG123#DONTDISPLAYBELOW#
+#SPECIALTAG123#ToTest#::flattenArray( [ [ 6, 7 ], [ 12, [ 3 ] ] ] ):: [ 6, 7, 12, 3 ]
+#SPECIALTAG123#ToTest#::flattenArray( [ [ [ 13, 4, 10 ], [ 11 ] ], [ 2 ], 3 ] ):: [ 13, 4, 10, 11, 2, 3 ]
+*-COMPILEBOX::ENDOFOUTPUT-* .12

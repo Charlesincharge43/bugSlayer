@@ -1,0 +1,20 @@
+sup. my name is  undefined 
+
+I study  undefined 
+
+peace 
+
+#SPECIALTAG123#DONTDISPLAYBELOW#
+#SPECIALTAG123#ToTest#::testStudent.sayHello() STDOUT::#asyncBelowFlag#:1
+#SPECIALTAG123#ToTest#::testStudent.sayMajor() STDOUT::#asyncBelowFlag#:2
+#SPECIALTAG123#ToTest#::testStudent.sayGoodBye() STDOUT::#asyncBelowFlag#:3
+#SPECIALTAG123#asyncBelowFlag#::1
+sup. my name is  undefined 
+
+#SPECIALTAG123#asyncBelowFlag#::2
+I study  undefined 
+
+#SPECIALTAG123#asyncBelowFlag#::3
+peace 
+
+*-COMPILEBOX::ENDOFOUTPUT-* .14

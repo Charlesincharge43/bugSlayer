@@ -46,10 +46,10 @@ var DockerSandbox = function(timeout_value,path,folder,vm_name,compiler_name,fil
 DockerSandbox.prototype.run = function(success)
 {
     var sandbox = this;
-    console.log('in dockersandbox run')
-    console.log('what is success: ', success)
+    // console.log('in dockersandbox run')
+    // console.log('what is success: ', success)
     this.prepare( function(){
-      console.log('inside prepare')
+      // console.log('inside prepare')
         sandbox.execute(success);
     });
 }
@@ -131,14 +131,14 @@ DockerSandbox.prototype.execute = function(success)
     var fs = require('fs');
     var myC = 0; //variable to enforce the timeout_value
     var sandbox = this;
-    console.log('in execute function')
+    // console.log('in execute function')
     //this statement is what is executed
     var st = this.path+'DockerTimeout.sh ' + this.timeout_value + 's -u mysql -e \'NODE_PATH=/usr/local/lib/node_modules\' -i -t -v  "' + this.path + this.folder + '":/usercode ' + this.vm_name + ' /usercode/script.sh ' + this.compiler_name + ' ' + this.file_name + ' ' + this.output_command+ ' ' + this.extra_arguments;
 
     //log the statement in console
     console.log(st);
-    console.log('the path is: ', this.path)
-    console.log('the folder is: ', this.folder)
+    // console.log('the path is: ', this.path)
+    // console.log('the folder is: ', this.folder)
 
     //execute the Docker, This is done ASYNCHRONOUSLY
     exec(st);

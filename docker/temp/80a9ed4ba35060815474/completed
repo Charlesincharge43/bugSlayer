@@ -1,0 +1,20 @@
+sup. my name is  Akshay 
+
+I study  Computer Science 
+
+peace 
+
+#SPECIALTAG123#DONTDISPLAYBELOW#
+#SPECIALTAG123#ToTest#::testStudent.sayHello() STDOUT::#asyncBelowFlag#:1
+#SPECIALTAG123#ToTest#::testStudent.sayMajor() STDOUT::#asyncBelowFlag#:2
+#SPECIALTAG123#ToTest#::testStudent.sayGoodBye() STDOUT::#asyncBelowFlag#:3
+#SPECIALTAG123#asyncBelowFlag#::1
+sup. my name is  Nishant 
+
+#SPECIALTAG123#asyncBelowFlag#::2
+I study  Statistics 
+
+#SPECIALTAG123#asyncBelowFlag#::3
+peace 
+
+*-COMPILEBOX::ENDOFOUTPUT-* .15

@@ -36,11 +36,12 @@ class CodeForm extends Component {
     const dbCurrentCodeObj = this.props.dbCodes[codeIdx]
     const expected = dbCurrentCodeObj.expected
 
-    // compile prepending code, then concat stdout of prepending code with user and solution code (each) + appending code
+    // compile preRun code, then concat stdout of preRun code with user and solution code (each) + appending code
     // then evaluate
     this.props.compile_UserCode_Set_TC({
       userCode: this.state.userCode,
       solutionCode: dbCurrentCodeObj.solutionCode,
+      preRunCode: dbCurrentCodeObj.preRunCode,
       prependingCode: dbCurrentCodeObj.prependingCode,
       appendingCode: dbCurrentCodeObj.appendingCode,
       codeIdx: this.props.codeIdx,
@@ -58,8 +59,11 @@ class CodeForm extends Component {
 
   handleRun(e){
     // compile user code (this is just if user wants to test)
+    const codeIdx = this.props.codeIdx
+    const dbCurrentCodeObj = this.props.dbCodes[codeIdx]
     this.props.compile_UserCode_TC({
       userCode: this.state.userCode,
+      prependingCode: dbCurrentCodeObj.prependingCode,
       codeIdx: this.props.codeIdx,
     })
   }

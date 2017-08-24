@@ -45,15 +45,32 @@
   margin: 0 0 0 auto;
 }
 
-.large-container {
-  width: 1000px;
+/*.large-container {
+  width: 400px;
   height: 500px;
-}
+}*/
+
+/* note.. the other code mirror style stuff is in the file codemirror.css (in CodeMirrorLib) */
 
 .code-mirror-container {
-  margin: 15px 0;
+  font-size: 14px;
   display: block;
 }
+
+.code-out-container {
+  margin: 15px 5px;
+  display: flex;
+}
+
+#output-container {
+  margin: 0 10px;
+  width: 450px;
+}
+
+pre {
+    white-space: pre-wrap;
+}
+
 
 .medium-form {
   width: 500px;

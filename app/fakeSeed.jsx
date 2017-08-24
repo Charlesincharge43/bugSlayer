@@ -3,6 +3,7 @@ const dbCodes =
     {
       startingCode:
   `
+//this function takes in a nested array and returns a flattened version of it
 function flattenArray(arr){
   var newArr = [];// flattened array
   for(var i = 0; i < arr.length; i++){
@@ -42,7 +43,7 @@ console.log(flattenedArray) // should be [1,2,3,4]... but I'm getting an empty a
   `,
 
 
-      prependingCode:
+      preRunCode:
   `
   function randomInt(min, max) {
       return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -59,6 +60,9 @@ console.log(flattenedArray) // should be [1,2,3,4]... but I'm getting an empty a
   console.log('var num2_6 = ', randomInt(1,20) )
   `,
 
+      prependingCode:
+  `
+  `,
 
       appendingCode:
   `
@@ -71,6 +75,72 @@ console.log(flattenedArray) // should be [1,2,3,4]... but I'm getting an empty a
 
       expected: [null],
   },
+  {
+  startingCode:
+`
+function Cat(name){
+  this.name= name;
+}
+
+Cat.prototype.meow = function () {
+  console.log(this.name, 'says meoooowwww');
+}
+
+Cat.prototype.delayedMeow = function(milliseconds){
+  setTimeout(function(){
+    this.meow()
+  }, milliseconds)
+}
+
+var newCat = new Cat('Garfield');
+newCat.delayedMeow(300)
+`,
+  solutionCode:
+`
+function Cat(name){
+  this.name= name;
+}
+
+Cat.prototype.meow = function () {
+  console.log(this.name, 'says meoooowwww');
+}
+
+Cat.prototype.delayedMeow = function(milliseconds){
+  setTimeout(() => this.meow(), milliseconds)
+}
+
+var newCat = new Cat('Garfield');
+newCat.delayedMeow(300)
+`,
+
+
+  explanation:
+`
+
+`,
+
+
+  preRunCode:
+`
+
+`,
+
+prependingCode:
+`
+`,
+
+  appendingCode:
+`
+  setTimeout(()=>{
+    console.log('#SPECIALTAG123#asyncBelowFlag#::1')
+    newCat.delayedMeow(300)
+  },0)
+  console.log('#SPECIALTAG123#ToTest#::newCat.delayedMeow STDOUT::#asyncBelowFlag#:1')
+`,
+
+
+  expected: [{tobe: 'Garfield says meoooowwww'}],
+},
 //   {
 //     startingCode:
 // `
@@ -174,9 +244,13 @@ console.log(flattenedArray) // should be [1,2,3,4]... but I'm getting an empty a
 // `,
 //
 //
-//     prependingCode:
+//     preRunCode:
 // `
 //
+// `,
+//
+//       prependingCode:
+// `
 // `,
 //
 //
@@ -190,69 +264,7 @@ console.log(flattenedArray) // should be [1,2,3,4]... but I'm getting an empty a
 //
 //     expected: [null, {within: {proportion: 0.2}}, {within: {proportion: 0.2}}],
 // },
-  {
-  startingCode:
-`
-function Cat(name){
-  this.name= name;
-}
 
-Cat.prototype.meow = function () {
-  console.log(this.name, 'says meoooowwww');
-}
-
-Cat.prototype.delayedMeow = function(milliseconds){
-  setTimeout(function(){
-    this.meow()
-  }, milliseconds)
-}
-
-var newCat = new Cat('Garfield');
-newCat.delayedMeow(300)
-`,
-  solutionCode:
-`
-function Cat(name){
-  this.name= name;
-}
-
-Cat.prototype.meow = function () {
-  console.log(this.name, 'says meoooowwww');
-}
-
-Cat.prototype.delayedMeow = function(milliseconds){
-  setTimeout(() => this.meow(), milliseconds)
-}
-
-var newCat = new Cat('Garfield');
-newCat.delayedMeow(300)
-`,
-
-
-  explanation:
-`
-
-`,
-
-
-  prependingCode:
-`
-
-`,
-
-
-  appendingCode:
-`
-  setTimeout(()=>{
-    console.log('#SPECIALTAG123#asyncBelowFlag#::1')
-    newCat.delayedMeow(300)
-  },0)
-  console.log('#SPECIALTAG123#ToTest#::newCat.delayedMeow STDOUT::#asyncBelowFlag#:1')
-`,
-
-
-  expected: [{tobe: 'Garfield says meoooowwww'}],
-},
 {
 startingCode:
 `
@@ -289,7 +301,7 @@ var bstBreadthFirstArr = []
 bst.breadthFirstForEach(el => bstBreadthFirstArr.push(el))
 
 console.log(bstBreadthFirstArr) // should equal [ 10, 2, 12, 5, 11, 20, 17 ] ..
-// WHAT IS GOING ON!!? WHY ISNT THIS FREAKING THING WORKING
+// why is this not working???  :(
 `,
 solutionCode:
 `
@@ -332,7 +344,7 @@ explanation:
 `,
 
 
-prependingCode:
+preRunCode:
 `
 function randomInt(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -344,9 +356,13 @@ while (argsSet.size <= 7){
 console.log('var inputsArr = ', [...argsSet])
 `,
 
+prependingCode:
+`
+`,
 
 appendingCode:
 `
+console.log('\\n*****************')
 let first = true;
 for (let item of inputsArr){
   if (first) {
@@ -407,7 +423,7 @@ physicsEquation = physicsHelperTool('Eq_Motion_Distance')
 console.log(physicsEquation(0, 0, -9.8, 5)) //this works fine
 
 physicsEquation = physicsHelperTool('Newtons_second')
-console.log(physicsEquation(20, 9.8)) //this is giving me a weird value??
+console.log(physicsEquation(20, 9.8)) //help!  for some reason this is giving me NaN???
 `,
 solutionCode:
 `
@@ -449,7 +465,7 @@ explanation:
 `,
 
 
-prependingCode:
+preRunCode:
 `
 function randomNum(min, max) {
     return (Math.random() * (max - min + 1) + min).toFixed(2)
@@ -470,6 +486,9 @@ var randomNums = [
 console.log('var randomNums = ',randomNums)
 `,
 
+prependingCode:
+`
+`,
 
 appendingCode:
 `
@@ -523,9 +542,13 @@ expected: [null, null, null, null],
 // `,
 //
 //
-//       prependingCode:
+//       preRunCode:
 // `
 //
+// `,
+//
+//       prependingCode:
+// `
 // `,
 //
 //
@@ -571,11 +594,14 @@ expected: [null, null, null, null],
 // `,
 //
 //
-//   prependingCode:
+//   preRunCode:
 // `
 //
 // `,
 //
+//    prependingCode:
+// `
+// `,
 //
 //     appendingCode:
 // `
@@ -586,8 +612,129 @@ expected: [null, null, null, null],
 //     expected: [null],
 //   },
 
+  { startingCode:
+`
+//assume contents of groceryList.txt are : 'bok choi: 10 apples: 5 detergent: 1 protein shake: 3'
+const groceryListFilePath = '/tmp/groceryList.txt';
+
+function doubleNumbers (str) {
+  let stringSplit = str.split(' ');
+  let stringSplitNumChanged = stringSplit.map(element => {
+    if(!isNaN(element)){
+      return element*2;
+    }
+    return element;
+  })
+  return stringSplitNumChanged.join(' ');
+}
+
+// printStringDoubledNums should take in a filepath, read the file, double all the numbers
+// and then console log the new string with doubled numbers
+function printStringDoubledNums(filepath){
+  // promisifiedReadFile is made available for the purposes of this problem (no need to write it)
+  let stringwithDoubledNumbers = doubleNumbers(promisifiedReadFile(filepath));
+  console.log(stringwithDoubledNumbers)
+}
+
+printStringDoubledNums(groceryListFilePath)
+// should console log: 'bok choi: 20 apples: 10 detergent: 2 protein shake: 6'
+`,
 
 
+    solutionCode:
+`
+const groceryListFilePath = '/tmp/groceryList.txt';
+//contents should read: 'bok choi: 10 apples: 5 detergent: 1 protein shake: 3'
+
+
+function doubleNumbers (str) {
+  let stringSplit = str.split(' ');
+  let stringSplitNumChanged = stringSplit.map(element => {
+    if(!isNaN(element)){
+      return element*2;
+    }
+    return element;
+  })
+  return stringSplitNumChanged.join(' ');
+}
+
+function printStringDoubledNums(filepath){
+  return promisifiedReadFile(filepath)
+    .then(fileContents => console.log(doubleNumbers(fileContents)))
+    .catch(console.error)
+}
+
+printStringDoubledNums(groceryListFilePath)
+`,
+
+
+    explanation:
+`
+
+`,
+
+
+  preRunCode:
+`
+function randomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+};
+
+const randomNums = [
+  randomInt(0,20),
+  randomInt(0,20),
+  randomInt(0,20),
+];
+
+const $SPECIALVAR123$groceryListTestVal = 'potatoes: '+ randomNums[0]+ ' oranges: '+ randomNums[1]+ ' greek yogurt: '+ randomNums[2];
+
+console.log('const $SPECIALVAR123$groceryListTestVal = "'+$SPECIALVAR123$groceryListTestVal+'"')
+`,
+
+prependingCode:
+`
+const promisifiedReadFile = (input) => {
+  let asdf;
+  try {
+    asdf = $SPECIALVAR123$groceryListTestVal
+  } finally {
+    const fileContentsHash = {
+      '/tmp/groceryList.txt': 'bok choi: 10 apples: 5 detergent: 1 protein shake: 3',
+      '$SPECIALVAR123$groceryListTestKey': asdf,
+    }
+    let resolvedValue = fileContentsHash[input];
+
+    return new Promise((resolve, reject) => {
+      setTimeout(()=>{
+        resolve(resolvedValue)
+      },100)
+    })
+  }
+}
+`,
+
+    appendingCode:
+`
+  //doesn't work fuckkkk...
+
+
+  console.log('#SPECIALTAG123#ToTest#::printStringDoubledNums STDOUT::#asyncBelowFlag#:1')
+  console.log('#SPECIALTAG123#ToTest#::printStringDoubledNums STDOUT::#asyncBelowFlag#:2')
+
+
+setTimeout(()=>{
+  console.log('#SPECIALTAG123#asyncBelowFlag#::1')
+  printStringDoubledNums('/tmp/groceryList.txt')
+}, 200)
+setTimeout(()=>{
+  console.log('#SPECIALTAG123#asyncBelowFlag#::2')
+  printStringDoubledNums('$SPECIALVAR123$groceryListTestKey')
+}, 400)
+`,
+
+
+    expected: [null, null],
+  },
   { startingCode:
 `
 function Zipper(list1, list2, name){
@@ -637,14 +784,20 @@ var newZip = new Zipper([1,2,3,4,5], ['a','b','c','d'], 'Numbers and Letters');
 `,
 
 
-  prependingCode:
+  preRunCode:
 `
 
 `,
 
+prependingCode:
+`
+`,
 
     appendingCode:
 `
+  console.log('\\n*****************')
+  console.log('making a new Zipper instance with args: ')
+  console.log('assigning the value of newZip.zip() to variable fruits_and_veggies...')
   newZip = new Zipper(['apples', 'oranges', 'cherries', 'bananas'], ['lettuce', 'bok choi', 'broccoli'], 'fruits and veggies');
   var fruits_and_veggies = newZip.zip()
   console.log('#SPECIALTAG123#ToTest#::fruits_and_veggies.toString()::', fruits_and_veggies.toString())
@@ -653,44 +806,188 @@ var newZip = new Zipper([1,2,3,4,5], ['a','b','c','d'], 'Numbers and Letters');
 
     expected: [null],
   },
+
+  { startingCode:
+  `
+function Person(name, age) {
+  this.name = name;
+  this.age = age;
+}
+
+Person.prototype.sayHello = () => {
+  console.log('sup. my name is ', this.name, '\\n');
+};
+
+Person.prototype.sayGoodBye = () => {
+  console.log('peace \\n')
+}
+
+function Student(name, age, major) {
+  Person.call(name, age);
+  this.major = major;
+}
+
+Student.prototype = Object.create(Person.prototype);
+
+Student.prototype.constructor = Student;
+
+Student.prototype.sayMajor = () => {
+  console.log('I study ', this.major, '\\n')
+}
+
+const akshay = new Student('Akshay', 19, 'Computer Science');
+akshay.sayHello();//name is undefined??
+akshay.sayMajor();//major is undefined??
+akshay.sayGoodBye();
+  `,
+
+
+      solutionCode:
+  `
+  function Person(name, age) {
+    this.name = name;
+    this.age = age;
+  }
+
+  Person.prototype.sayHello = function(){
+    console.log('sup. my name is ', this.name, '\\n');
+  };
+
+  Person.prototype.sayGoodBye = function(){
+    console.log('peace \\n')
+  }
+
+  function Student(name, age, major) {
+    Person.call(this, name, age);
+    this.major = major;
+  }
+
+  Student.prototype = Object.create(Person.prototype);
+
+  Student.prototype.constructor = Student;
+
+  Student.prototype.sayMajor = function(){
+    console.log('I study ', this.major, '\\n')
+  }
+
+  const akshay = new Student('Akshay', 20, 'Computer Science');
+  akshay.sayHello();
+  akshay.sayMajor();
+  akshay.sayGoodBye();
+  `,
+
+
+      explanation:
+  `
+
+  `,
+
+
+    preRunCode:
+  `
+  var majors = [
+    'Psychology',
+    'Computer Science',
+    'Literature',
+    'Biology',
+    'History',
+    'Chemistry',
+    'Statistics',
+    'Economics'
+    ];
+
+  var students = [
+    'Charles',
+    'Nishant',
+    'Jacob',
+    'Nick',
+    'Connie',
+    'Gabi',
+    'Alex',
+    'Ellie',
+    'Akshay',
+    'Camden',
+    'Kevin',
+    'Willy',
+    'Tim',
+    'Ben',
+    'Collin'
+  ]
+
+  function randomInt(min, max) {
+      return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  var chosenMajor = majors[randomInt(1,majors.length-1)]
+  var chosenStudent = students[randomInt(1,students.length-1)]
+  var chosenAge = randomInt(18,30)
+
+  console.log('const $SPECIALVAR123$chosenMajor = "'+chosenMajor+'"')
+  console.log('const $SPECIALVAR123$chosenStudent = "'+chosenStudent+'"')
+  console.log('const $SPECIALVAR123$chosenAge = "'+chosenAge+'"')
+  `,
+
+    prependingCode:
+  `
+  `,
+
+      appendingCode:
+  `
+  const $SPECIALVAR123$student = new Student($SPECIALVAR123$chosenStudent, $SPECIALVAR123$chosenAge, $SPECIALVAR123$chosenMajor);
+  console.log('#SPECIALTAG123#ToTest#::testStudent.sayHello() STDOUT::#asyncBelowFlag#:1')
+  console.log('#SPECIALTAG123#ToTest#::testStudent.sayMajor() STDOUT::#asyncBelowFlag#:2')
+  console.log('#SPECIALTAG123#ToTest#::testStudent.sayGoodBye() STDOUT::#asyncBelowFlag#:3')
+  console.log('#SPECIALTAG123#asyncBelowFlag#::1')
+  $SPECIALVAR123$student.sayHello();
+  console.log('#SPECIALTAG123#asyncBelowFlag#::2')
+  $SPECIALVAR123$student.sayMajor();
+  console.log('#SPECIALTAG123#asyncBelowFlag#::3')
+  $SPECIALVAR123$student.sayGoodBye();
+
+  `,
+
+
+      expected: [null],
+  },
+
+
+//empty code template
 //   { startingCode:
 // `
-// function addFirstToEnd(arr, first, second, third) {
-//   var first = arr[0];
-//   return arr.push(first)
-// }
+//
 // `,
 //
 //
 //     solutionCode:
 // `
-// function addFirstToEnd(arr, first, second, third) {
-//   var first = arr[0];
-//   return arr.push(first)
-// }
+//
 // `,
 //
 //
 //     explanation:
 // `
-// look up hoisting
+//
 // `,
 //
+//
+//   preRunCode:
+// `
+//
+// `,
 //
 //   prependingCode:
 // `
-//
 // `,
-//
 //
 //     appendingCode:
 // `
-//   console.log('#SPECIALTAG123#ToTest#::returnFirstFoo()::', returnFirstFoo())
+//
 // `,
 //
 //
 //     expected: [null],
-//   }
+//   },
+
 ]
 
 export default dbCodes

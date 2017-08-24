@@ -31,7 +31,7 @@ class CodePage extends Component {
   next() {
     const length = this.props.dbCodes.length
     const codeIdx = this.props.codeIdx
-    if (codeIdx < length - 1){
+    if (codeIdx < length - 1) {
       this.props.get_Code_Output_AC('')
       this.props.set_codeIdx_AC(this.props.codeIdx + 1)
     }
@@ -49,8 +49,10 @@ class CodePage extends Component {
       <div>
         <h2 className='text-center slim_tb_margins'>What's wrong with my code?</h2>
         <ProgressNav next={this.next} prev={this.prev} />
-        <CodeForm />
-        <Output />
+        <div className='code-out-container'>
+          <CodeForm />
+          <Output />
+        </div>
       </div>
     )
   }
