@@ -16,7 +16,10 @@ module.exports = require('express').Router()
       console.log('prepending is ', prependingCode)
       console.log('test code is (look for prepending! )', + testCode)
       let sandBoxPromise = runSandBox({code: testCode})
-      sandBoxPromise.then(resolved => res.json(resolved))
+      sandBoxPromise.then(resolved => {
+        console.log('resolved is... ', resolved)
+        res.json(resolved)
+      })
     })
   .post('/codeSet', // for composing and running preRun code, solution code, and user code
   // (the results of the same preRun code should be applied to solution code and user code)
@@ -28,12 +31,20 @@ module.exports = require('express').Router()
     const userCode = prependingCode + req.body.userCode + appendingBreakTag + appendingCode
     const solutionCode = prependingCode + req.body.solutionCode + appendingBreakTag + appendingCode
     const preRunCode = req.body.preRunCode
-    runSandBoxCodeSet({preRunCode, solutionCode, userCode, prependingCode})
+    // runSandBoxCodeSet({preRunCode, solutionCode, userCode, prependingCode})
+    //   .then(outputArray => {
+    //     // console.log('output array is ', outputArray)
+    //     res.json({userCodeOut: outputArray[0], solutionCodeOut: outputArray[1]})
+    //   })
+    //   .catch(console.error)
+
+    runSandBox({.. }) // CHANGE THIS ASAP
       .then(outputArray => {
         // console.log('output array is ', outputArray)
         res.json({userCodeOut: outputArray[0], solutionCodeOut: outputArray[1]})
       })
       .catch(console.error)
+
     // let composeGraph = req.body.composeGraph
     // composeSandBox(composeGraph)
     //   .then(resolved => res.json(resolved))

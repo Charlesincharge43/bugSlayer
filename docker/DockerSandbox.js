@@ -5,7 +5,16 @@
         *Revised on: 25th June 2014 (Added folder mount permission and changed executing user to nobody using -u argument)
         *Revised on: 30th June 2014 (Changed the way errors are logged on console, added language name into error messages)
 */
-
+const exec = require('child_process').exec
+const fs = require('fs')
+const utils = require('./utils')
+const promisifiedExec = utils.promisifiedExec
+const promisifiedWriteFile = utils.promisifiedWriteFile
+const promisifiedReadFile = utils.promisifiedReadFile
+const mkDirFromDirTree = utils.mkDirFromDirTree
+const writeFilesFromDirTree = utils.writeFilesFromDirTree
+const prependPaths = utils.prependPaths
+const throwErr = utils.throwErr
 
 /**
          * @Constructor
@@ -20,22 +29,20 @@
          * @param {String} code: The actual code
          * @param {String} output_command: Used in case of compilers only, to execute the object code, send " " in case of interpretors
 */
-var DockerSandbox = function(timeout_value,path,folder,vm_name,compiler_name,file_name,code,output_command,languageName,e_arguments,stdin_data)
-{
-
-    this.timeout_value=timeout_value;
-    this.path=path;
-    this.folder=folder;
-    this.vm_name=vm_name;
-    this.compiler_name=compiler_name;
-    this.file_name=file_name;
-    this.code = code;
-    this.output_command=output_command;
-    this.langName=languageName;
-    this.extra_arguments=e_arguments;
-    this.stdin_data=stdin_data;
+var DockerSandbox = function({timeout_value, path, folder, vm_name, compiler_name, file_name, code, output_command, languageName, e_arguments, stdin_data, files = {}, entryFile}) {
+  this.timeout_value= timeout_value
+  this.path= path
+  this.folder= folder
+  this.vm_name= vm_name
+  this.compiler_name= compiler_name
+  this.file_name= file_name // for cases when there are multiple files, this will be treated as the entrypoint (node <file_name>.js) *can be actual path inside the containerMntPath
+  this.code = code
+  this.files = files // for the optional runOne (specific file) method .. should look like {'index.js':{code: '//code', path: '/app'}, 'index.test.js':{code: '//code', path: '/app'}}
+  this.output_command= output_command
+  this.langName= languageName
+  this.extra_arguments= e_arguments
+  this.stdin_data= stdin_data
 }
-
 
 /**
          * @function
@@ -43,17 +50,38 @@ var DockerSandbox = function(timeout_value,path,folder,vm_name,compiler_name,fil
          * @description Function that first prepares the Docker environment and then executes the Docker sandbox
          * @param {Function pointer} success ?????
 */
-DockerSandbox.prototype.run = function(success)
-{
-    var sandbox = this;
-    // console.log('in dockersandbox run')
-    // console.log('what is success: ', success)
-    this.prepare( function(){
-      // console.log('inside prepare')
-        sandbox.execute(success);
-    });
+DockerSandbox.prototype.run = function(success) {
+  this.prepare()
+    .then(() => this.execute(success))
+    .catch(console.error)
 }
 
+DockerSandbox.prototype.runOne = function(success) { // test run.. delete later!
+  // const test =
+  // {
+  //         "path": "app",
+  //         "name": "app",
+  //         "type": "directory",
+  //         "children": [
+  //           {
+  //             "path": "app/index.js",
+  //             "name": "index.js",
+  //             "type": "file",
+  //             "content": `console.log('hello world')`,
+  //             "extension": ".js"
+  //           },
+  //           {
+  //             "path": "app/asdf",
+  //             "name": "asdf",
+  //             "type": "directory",
+  //           },
+  //         ]
+  // }
+  // this.file_name = 'app/index.js'
+  this.prepareDirTree()
+    .then(() => this.execute(success))
+    .catch(console.error)
+}
 
 /*
          * @function
@@ -66,47 +94,27 @@ DockerSandbox.prototype.run = function(success)
          * Docker container when we run it.
          * @param {Function pointer} success ?????
 */
-DockerSandbox.prototype.prepare = function(success)
-{
-    var exec = require('child_process').exec;
-    var fs = require('fs');
-    var sandbox = this;
+DockerSandbox.prototype.prepare = function() {
+  const containerMntPath = this.path + this.folder
+  const makeTempDirSt = 'mkdir ' + containerMntPath
+  const copyPayloadSt = `cp ${this.path}/Payload/* ${containerMntPath}`
+  const chmod777dirSt = 'chmod 777 ' + containerMntPath
+  const allSt = makeTempDirSt + ' && ' + copyPayloadSt + ' && ' + chmod777dirSt
+  const userCodefilePath = containerMntPath + '/' + this.file_name
+  const inputFilePath = containerMntPath + '/inputFile'
+  const chmod777St = `chmod 777 \'${containerMntPath}/${this.file_name}\'`
 
-    exec("mkdir "+ this.path+this.folder + " && cp "+this.path+"/Payload/* "+this.path+this.folder+"&& chmod 777 "+ this.path+this.folder,function(st)
-        {
-            fs.writeFile(sandbox.path + sandbox.folder+"/" + sandbox.file_name, sandbox.code,function(err)
-            {
-                if (err)
-                {
-                    console.log(err);
-                }
-                else
-                {
-                    console.log(sandbox.langName+" file was saved!");
-                    exec("chmod 777 \'"+sandbox.path+sandbox.folder+"/"+sandbox.file_name+"\'")
-
-                    fs.writeFile(sandbox.path + sandbox.folder+"/inputFile", sandbox.stdin_data,function(err)
-                    {
-                        if (err)
-                        {
-                            console.log(err);
-                        }
-                        else
-                        {
-                            console.log("Input file was saved!");
-                            success();
-                        }
-                    });
-
-
-                }
-            });
-
-
-
-
-        });
-
+  return promisifiedExec(allSt)
+    .then(() => promisifiedWriteFile(userCodefilePath, this.code))
+    .then(() => {
+      console.log(this.langName+' file was saved!')
+      exec(chmod777St)
+      return promisifiedWriteFile(inputFilePath, this.stdin_data)
+    }, throwErr)
+    .then(() => {
+      console.log('Input file was saved!')
+    }, throwErr)
+    .catch(throwErr)
 }
 
 /*
@@ -125,105 +133,112 @@ DockerSandbox.prototype.prepare = function(success)
          * @param {Function pointer} success ?????
 */
 
-DockerSandbox.prototype.execute = function(success)
-{
-    var exec = require('child_process').exec;
-    var fs = require('fs');
-    var myC = 0; //variable to enforce the timeout_value
-    var sandbox = this;
-    // console.log('in execute function')
-    //this statement is what is executed
-    var st = this.path+'DockerTimeout.sh ' + this.timeout_value + 's -u mysql -e \'NODE_PATH=/usr/local/lib/node_modules\' -i -t -v  "' + this.path + this.folder + '":/usercode ' + this.vm_name + ' /usercode/script.sh ' + this.compiler_name + ' ' + this.file_name + ' ' + this.output_command+ ' ' + this.extra_arguments;
+DockerSandbox.prototype.execute = function(success) {
+  let myC = 0 // variable to enforce the timeout_value
+  const rmDir = function(intid) { // remove the temporary directory
+    console.log('ATTEMPTING TO REMOVE: ' + this.folder + '\n------------------------------')
+    exec('rm -r ' + this.folder)
+    clearInterval(intid)
+  }
+  const containerMntPath = this.path + this.folder
+  // this statement is what is executed (to run user's code)
+  const st = this.path+'DockerTimeout.sh ' + this.timeout_value + 's -u mysql -e \'NODE_PATH=/usr/local/lib/node_modules\' -i -t -v  "' + containerMntPath + '":/usercode ' + this.vm_name + ' /usercode/script.sh ' + this.compiler_name + ' ' + this.file_name + ' ' + this.output_command+ ' ' + this.extra_arguments
+  // this is path for the completed output file (if user code executed successfully... although completed file should appear if an error was thrown as well)
+  const completedPath = containerMntPath + '/completed'
+  // this is path for error output file (if user code threw an error)
+  const errPath = containerMntPath + '/errors'
+  // this is partial output
+  const logPath = containerMntPath + '/logfile.txt'
 
-    //log the statement in console
-    console.log(st);
-    // console.log('the path is: ', this.path)
-    // console.log('the folder is: ', this.folder)
+  // log the statement in console
+  console.log(st)
+  // console.log('the path is: ', this.path)
+  // console.log('the folder is: ', this.folder)
 
-    //execute the Docker, This is done ASYNCHRONOUSLY
-    exec(st);
-    console.log("------------------------------")
-    //Check For File named "completed" after every 1 second
-    var intid = setInterval(function()
-        {
-            //Displaying the checking message after 1 second interval, testing purposes only
-            console.log("Checking " + sandbox.path+sandbox.folder + ": for completion: " + myC);
+  // execute the Docker, This is done ASYNCHRONOUSLY.. so need the setInterval (cant do then.. because it may be infinite loop)
+  exec(st)
 
-            myC = myC + 1;
+  console.log('------------------------------')
+  const intid = setInterval(() => { // Check For File named 'completed' after every 1 second
+    // Displaying the checking message after 1 second interval, testing purposes only
+    console.log('Checking ' + containerMntPath + ': for completion: ' + myC)
+    myC = myC + 1
 
-            fs.readFile(sandbox.path + sandbox.folder + '/completed', 'utf8', function(err, data) {
-              console.log('err is ', err)
-            //if file is not available yet and the file interval is not yet up carry on
-            if (err && myC < sandbox.timeout_value)
-            {
-                //console.log(err);
-                return;
-            }
-            //if file is found simply display a message and proceed
-            else if (myC < sandbox.timeout_value)
-            {
-                console.log("DONE")
-                //check for possible errors
-                fs.readFile(sandbox.path + sandbox.folder + '/errors', 'utf8', function(err2, data2)
-                {
-                	if(!data2) data2=""
-               		console.log("Error file: ")
-               		console.log(data2)
-
-               		console.log("Main File")
-               		console.log(data)
-
-			var lines = data.toString().split('*-COMPILEBOX::ENDOFOUTPUT-*')
-			data=lines[0]
-			var time=lines[1]
-
-			console.log("Time: ")
-			console.log(time)
-
-
-       	           	success(data,time,data2)
-                });
-
-                //return the data to the calling functoin
-
-            }
-            //if time is up. Save an error message to the data variable
-            else
-            {
-            	//Since the time is up, we take the partial output and return it.
-            	fs.readFile(sandbox.path + sandbox.folder + '/logfile.txt', 'utf8', function(err, data){
-            		if (!data) data = "";
-                    data += "\nExecution Timed Out";
-                    console.log("Timed Out: "+sandbox.folder+" "+sandbox.langName)
-                    fs.readFile(sandbox.path + sandbox.folder + '/errors', 'utf8', function(err2, data2)
-	                {
-	                	if(!data2) data2=""
-
-				var lines = data.toString().split('*---*')
-				data=lines[0]
-				var time=lines[1]
-
-				console.log("Time: ")
-				console.log(time)
-
-	                   	success(data,data2)
-	                });
-            	});
-
-            }
-
-
-            //now remove the temporary directory
-            console.log("ATTEMPTING TO REMOVE: " + sandbox.folder);
-            console.log("------------------------------")
-            exec("rm -r " + sandbox.folder);
-
-
-            clearInterval(intid);
-        });
-    }, 500);
-
+    promisifiedReadFile(completedPath, 'utf8')
+      .then(data => {
+        if (myC > this.timeout_value) { // Since the time is up, we take the partial output and return it.
+          throwErr('partial')
+        } else { // this is case for when output file is found (success!)
+          console.log('******************  DONE ... OUTPUT FOUND')
+          return promisifiedReadFile(errPath, 'utf8')
+            .then(errOutput => {
+              const lines = data.toString().split('*-COMPILEBOX::ENDOFOUTPUT-*')
+              const output = lines[0]
+              const time = lines[1]
+              console.log('****Main file: \n', output, '\n****Error file: \n', errOutput)
+              success(output, time, errOutput)
+              rmDir(intid) // remove directory and clear interval
+            })
+            .catch(console.error)
+        }
+      }, () => { // error cb represents if no file found
+        if (myC > this.timeout_value) { // Since the time is up, we take the partial output and return it.
+          throwErr('partial')
+        }// otherwise, do nothing
+      })
+      .catch(err => {
+        rmDir(intid) // remove directory and clear interval
+        if (err.message.match('partial')) {
+          return promisifiedReadFile(logPath, 'utf8')
+            .then(logdata => {
+              logdata = logdata || ''
+              logdata += '\nExecution Timed Out'
+              // console.log('Timed Out: '+this.folder+' '+this.langName)
+              return promisifiedReadFile(errPath, 'utf8')
+                .then(errOutput => {
+                  const lines = logdata.toString().split('*---*')
+                  const output = lines[0]
+                  const time = lines[1]
+                  // console.log('Time: ', time)
+                  success(output, time, errOutput)
+                })
+                .catch(throwErr)
+            })
+            .catch(throwErr)
+        } else {
+          console.log('****Warning.. should NOT be entering this block (if entered, something really messed up happened).. \n'+err)
+          throwErr(err)
+        }
+      })
+  }, 500)
 }
 
+DockerSandbox.prototype.prepareDirTree = function() {
+  const dirTree = this.files
+  const containerMntPath = this.path + this.folder
+  const makeTempDirSt = 'mkdir ' + containerMntPath
+  const copyPayloadSt = `cp ${this.path}/Payload/* ${containerMntPath}`
+  const chmod777dirSt = 'chmod 777 ' + containerMntPath
+  const allSt = makeTempDirSt + ' && ' + copyPayloadSt + ' && ' + chmod777dirSt
 
-module.exports = DockerSandbox;
+  const userCodefilePath = containerMntPath + '/' + this.file_name
+  const chmod777St = `chmod 777 \'${containerMntPath}/${this.file_name}\'`
+  const inputFilePath = containerMntPath + '/inputFile'
+  prependPaths(dirTree, containerMntPath) // this MUTATES the dirTree so all paths are prepended with containerMntPath
+  return promisifiedExec(allSt)
+    .then(() => {
+      return mkDirFromDirTree(dirTree)
+    })
+    .then(() => writeFilesFromDirTree(dirTree))
+    .then(() => {
+      console.log(this.langName+' file was saved!')
+      exec(chmod777St)
+      return promisifiedWriteFile(inputFilePath, this.stdin_data)
+    }, throwErr)
+    .then(() => {
+      console.log('Input file was saved!')
+    }, throwErr)
+    .catch(throwErr)
+}
+
+module.exports = DockerSandbox
